@@ -22,13 +22,24 @@ var getUserRepos = function(user) {
 
     // make a request to the url
     fetch(apiUrl).then(function(resopnse) {
-        resopnse.json().then(function(data) {
-            displayRepos(data, user)
+        if (resopnse.ok) {
+            resopnse.json().then(function(data) {
+                displayRepos(data, user)
+
+            })
+        }
+        else {
+            alert("Error: GitHub User Not Found")
+        }
             // console.log(data)
-        })
     })
 }
 var displayRepos = function(repos, searchTerm) {
+    // check if api returned any repos
+    if(repos.length === 0) {
+        repoContainerEl.textContent = "No repositories found."
+        return
+    }
     repoContainerEl.textContent = ""
     repoSearchTerm.textContent = searchTerm
     // loop over repos
