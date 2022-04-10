@@ -1,5 +1,20 @@
 var issueContainerEl = document.querySelector("#issues-container");
 var limmitWarningEl = document.querySelector("#limit-warning")
+
+var repoNameEl = document.querySelector("#repo-name");
+var getRepoName = function() {
+    var queryString = document.location.search
+    var repoName = queryString.split("=")[1]
+    if(repoName) {
+        // displat repo name on page
+        repoNameEl.textContent = repoName
+        getRepoIssues(repoName)
+    }
+    else {
+        // if no repo was givin, redirect to the home page
+        document.location.replace("./index.html")
+    }
+}
 var getRepoIssues = function(repo) {
     var apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
     fetch(apiUrl).then(function(resopnse) {
@@ -7,14 +22,15 @@ var getRepoIssues = function(repo) {
         if (resopnse.ok) {
             resopnse.json().then(function(data) {
                 displayIssues(data)
+                // check if api has paginated issues
+                if (resopnse.headers.get("Link")) {
+                    displayWarning(repo)
+                }
             })
         }
-        // check if api has paginated issues
-        if (resopnse.headers.get("Link")) {
-            displayWarning(repo)
-        }
         else {
-            alert("There was aproblem with your request!")
+            // if not successful, redirect to homepage
+            document.location.replace("./index.html")
         }
     })
     console.log(repo)
@@ -55,9 +71,9 @@ var displayWarning = function(repo) {
     limmitWarningEl.textContent = "To see more then 30 issues, visit "
     var linkEl = document.createElement("a")
     linkEl.textContent = "See More Issues on GitHub.com"
-    linkEl.setAttribute("href", "https://github.com/" + repo + "/issuses")
+    linkEl.setAttribute("href", "https://github.com/" + repo + "/issues")
     linkEl.setAttribute("target", "_blank")
     // append to warning container
     limmitWarningEl.appendChild(linkEl)
 }
-getRepoIssues("facebook/react")
+getRepoName();
